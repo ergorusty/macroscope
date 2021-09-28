@@ -7,7 +7,7 @@ license = "ISC OR Apache-2.0"
 repository = "https://github.com/ergorusty/macroscope"
 
 [dependencies]
-macroscope-macro = { verion = "0.1.0", path = "../macroscope-macro" }
+macroscope-macro = { version = "0.1.0", path = "../macroscope-macro" }
 macroscope-utils = { version = "0.1.0", path = "../macroscope-utils" }
 proc-macro-crate = "1.1.0"
 proc-macro2 = "1.0.29"
