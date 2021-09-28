@@ -1,0 +1,13 @@
+[package]
+name = "macroscope"
+version = "0.1.0"
+edition = "2018"
+
+
+[dependencies]
+macroscope-macro = { verion = "0.1.0", path = "../macroscope-macro" }
+macroscope-utils = { version = "0.1.0", path = "../macroscope-utils" }
+proc-macro-crate = "1.1.0"
+proc-macro2 = "1.0.29"
+quote = "1.0.9"
+syn = { version = "1.0.76", features = ["full", "extra-traits"] }
