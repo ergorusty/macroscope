@@ -1,7 +1,7 @@
 mod macros;
 
 pub mod tools {
-    pub use {::proc_macro2, ::quote, ::syn};
+    pub use {::proc_macro2, ::proc_macro_crate, ::quote, ::syn};
 }
 
 use proc_macro2::Span;
