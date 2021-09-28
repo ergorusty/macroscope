@@ -1,8 +1,10 @@
 [package]
 name = "macroscope"
+description = "Macroscope makes writing proc macros a breeze"
 version = "0.1.0"
 edition = "2018"
-
+license = "ISC OR Apache-2.0"
+repository = "https://github.com/ergorusty/macroscope"
 
 [dependencies]
 macroscope-macro = { verion = "0.1.0", path = "../macroscope-macro" }
