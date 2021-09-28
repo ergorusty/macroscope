@@ -1,7 +1,7 @@
 [package]
 name = "macroscope-utils"
 description = "An implementation detail of the macroscope library"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2018"
 license = "ISC OR Apache-2.0"
 repository = "https://github.com/ergorusty/macroscope"
