@@ -1,4 +1,4 @@
-use syn::{
+use crate::tools::syn::{
     parse::{discouraged::Speculative, Parse, ParseStream},
     token::Token,
 };

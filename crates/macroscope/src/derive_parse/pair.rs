@@ -1,7 +1,7 @@
-use quote::{quote, ToTokens};
-use syn::parse::Parse;
-
-use crate::validate::Validate;
+use crate::derive_parse::validate::Validate;
+use crate::tools::proc_macro2;
+use crate::tools::quote::{quote, ToTokens};
+use crate::tools::syn::{self, parse::Parse};
 
 #[derive(Debug)]
 pub struct Prefixed<T, U>

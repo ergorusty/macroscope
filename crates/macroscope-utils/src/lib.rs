@@ -1,13 +1,20 @@
 mod macros;
 
 pub mod tools {
-    pub use {::proc_macro2, ::proc_macro_crate, ::quote, ::syn};
+    pub use {
+        ::derive_syn_parse, ::proc_macro2, ::proc_macro_crate, ::proc_macro_error, ::quote, ::syn,
+    };
 }
 
-use proc_macro2::Span;
 use proc_macro_crate::{crate_name, FoundCrate};
 use quote::quote;
 use syn::{Ident, LitStr};
+
+pub type Tokens = proc_macro2::TokenStream;
+pub use proc_macro2::Span;
+
+#[allow(non_camel_case_types)]
+pub type string = &'static str;
 
 pub fn quote_crate(found: FoundCrate) -> proc_macro2::TokenStream {
     match found {

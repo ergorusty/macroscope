@@ -7,7 +7,7 @@ pub trait TransparentWrapper {
 #[macro_export]
 macro_rules! transparent_wrapper {
     ($ident:ident $(< $($ty:ident),* $(,)? >)? $(where { $($where_clause:tt)* })? => self.$path:ident as $path_ty:ty) => {
-        impl $(< $($ty,)* >)? $crate::wrapper::TransparentWrapper for $ident $(< $($ty,)* >)? $(where $($where_clause)*)? {
+        impl $(< $($ty,)* >)? $crate::derive_parse::wrapper::TransparentWrapper for $ident $(< $($ty,)* >)? $(where $($where_clause)*)? {
             type Inner = $path_ty;
 
             fn into_inner(self) -> $path_ty {

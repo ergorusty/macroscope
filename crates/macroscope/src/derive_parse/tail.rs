@@ -1,7 +1,11 @@
-use quote::{quote, ToTokens};
-use syn::parse::{discouraged::Speculative, Parse};
+use crate::tools::proc_macro2;
+use crate::tools::quote::{quote, ToTokens};
+use crate::tools::syn::{
+    self,
+    parse::{discouraged::Speculative, Parse},
+};
 
-use crate::{validate::Validate, wrapper::HasParts};
+use crate::derive_parse::{validate::Validate, wrapper::HasParts};
 
 #[derive(Debug)]
 pub struct ListWithTail<T, U>

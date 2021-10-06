@@ -1,7 +1,8 @@
-use quote::{quote, ToTokens};
-use syn::parse::Parse;
+use crate::tools::proc_macro2;
+use crate::tools::quote::{quote, ToTokens};
+use crate::tools::syn::{self, parse::Parse};
 
-use crate::validate::Validate;
+use crate::derive_parse::validate::Validate;
 
 #[derive(Debug)]
 pub enum Optional<T>
@@ -10,6 +11,30 @@ where
 {
     Present(T),
     Missing,
+}
+
+impl<T> Into<Optional<T>> for Option<T>
+where
+    T: Parse + Validate,
+{
+    fn into(self) -> Optional<T> {
+        match self {
+            Some(present) => Optional::Present(present),
+            None => Optional::Missing,
+        }
+    }
+}
+
+impl<T> Into<Option<T>> for Optional<T>
+where
+    T: Parse + Validate,
+{
+    fn into(self) -> Option<T> {
+        match self {
+            Optional::Present(present) => Some(present),
+            Optional::Missing => None,
+        }
+    }
 }
 
 impl<T> ToTokens for Optional<T>

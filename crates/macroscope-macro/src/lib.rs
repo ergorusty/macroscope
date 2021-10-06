@@ -1,9 +1,12 @@
 use derive_syn_parse::Parse;
 use macroscope_utils::find_macroscope;
+use proc_macro::TokenStream;
 use proc_macro2::Span;
+use proc_macro_roids::DeriveInputExt;
 use quote::quote;
 use syn::{
-    parse::ParseStream, parse_macro_input, punctuated::Punctuated, Ident, LitStr, Path, Token,
+    parse::ParseStream, parse_macro_input, parse_quote, punctuated::Punctuated, DeriveInput, Ident,
+    LitStr, Path, Token,
 };
 
 #[derive(Debug, Parse)]
@@ -91,6 +94,35 @@ pub fn build_using(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     //     proc_macro2::TokenStream::from(quote! { #prefix :: macros :: crates :: #quoted })
     // };
+}
+
+#[proc_macro_attribute]
+pub fn copyable_ast(_args: TokenStream, item: TokenStream) -> TokenStream {
+    let mut ast = parse_macro_input!(item as DeriveInput);
+
+    let derives = parse_quote!(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash);
+    ast.append_derives(derives);
+    TokenStream::from(quote! { #ast })
+}
+
+#[proc_macro_attribute]
+pub fn ast(_args: TokenStream, item: TokenStream) -> TokenStream {
+    let mut ast = parse_macro_input!(item as DeriveInput);
+
+    let derives = parse_quote!(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash);
+    ast.append_derives(derives);
+
+    TokenStream::from(quote! { #ast })
+}
+
+#[proc_macro_attribute]
+pub fn data(_args: TokenStream, item: TokenStream) -> TokenStream {
+    let mut ast = parse_macro_input!(item as DeriveInput);
+
+    let derives = parse_quote!(Debug, Clone);
+    ast.append_derives(derives);
+
+    TokenStream::from(quote! { #ast })
 }
 
 fn normalize(name: &str) -> String {
