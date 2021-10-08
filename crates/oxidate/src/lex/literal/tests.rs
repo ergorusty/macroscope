@@ -1,6 +1,6 @@
 #![allow(clippy::float_cmp, clippy::non_ascii_literal, non_snake_case)]
 
-use crate::{Literal as OxidateLiteral, ToTokenTree};
+use crate::{AstParse, AstSpan, Lexer, Literal as OxidateLiteral, Literal, Spanned, ToTokenTree};
 use colored::Colorize;
 use pad::PadStr;
 use proc_macro2::{TokenStream, TokenTree};
@@ -77,7 +77,7 @@ macro_rules! assert_matches {
 
 macro_rules! test_literal {
     ($source:tt => $literal_ty:ident($expected:expr) $suffix:tt) => {{
-        fn test_literal<$literal_ty: LiteralTrait>(
+        fn test_literal<$literal_ty: LiteralTrait + AstParse>(
             source: &str,
             expected: &$literal_ty::Output,
         ) -> TestResult {
@@ -106,6 +106,50 @@ macro_rules! test_literal {
 
             if source_round_trip != source {
                 test_literal::<$literal_ty>(&source_round_trip, expected)?;
+            }
+
+            let mut lexer = Lexer::source($source)?;
+
+            assert_matches! {
+                "peeking" { source } (style: debug) => stringify!(Literal);
+
+                expected(style: debug) = expected;
+                parsed(style: display) = { lexer.lookahead() };
+
+                assert { lexer.lookahead_is::<Literal>() } or "Failed to peek as a literal";
+            };
+
+            assert_matches! {
+                "peeking" { source } (style: debug) => stringify!($literal_ty);
+
+                expected(style: debug) = expected;
+                parsed(style: display) = { lexer.lookahead() };
+
+                assert { lexer.lookahead_is::<$literal_ty>() } or "Failed to peek as a literal";
+            };
+
+            match lexer.try_parse::<Literal>().ok() {
+                None => {
+                    assert_matches! {
+                        "lexing" { source } (style: debug) => stringify!(Literal);
+
+                        expected(style: debug) = Some(expected);
+                        parsed(style: debug) = None::<Literal>;
+
+                        assert { false } or "Literal lex failure";
+                    };
+                }
+
+                Some(token) => {
+                    assert_matches! {
+                        "lexing" { source } (style: debug) => stringify!(Literal);
+
+                        expected(style: debug) = expected;
+                        parsed(style: debug) = token;
+
+                        assert { &token == actual_literal.unspanned() } or "Literal lex failure";
+                    };
+                }
             }
 
             Ok(())
@@ -174,7 +218,7 @@ impl<'a> std::fmt::Display for PanicMessage<'a> {
     }
 }
 
-fn lit(s: &str) -> OxidateLiteral {
+fn lit(s: &str) -> Spanned<OxidateLiteral> {
     match TokenStream::from_str(s)
         .unwrap()
         .into_iter()

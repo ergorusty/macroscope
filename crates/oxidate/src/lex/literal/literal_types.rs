@@ -10,7 +10,7 @@ use oxidate_macros::{data, key};
 
 use crate::Span;
 
-use super::UnspannedLiteral;
+use super::Literal;
 
 pub trait SuffixTrait {
     fn as_string(&self) -> &str;
@@ -396,11 +396,11 @@ pub trait LiteralTrait: BaseType + std::fmt::Display {
     fn value(&self) -> Mown<Self::Output>;
     fn as_str(&self) -> Mown<str>;
 
-    fn check(literal: &UnspannedLiteral) -> Option<&Self>
+    fn check(literal: &Literal) -> Option<&Self>
     where
         Self: Sized;
 
-    fn matches_value(literal: &UnspannedLiteral, output: &Self::Output) -> bool
+    fn matches_value(literal: &Literal, output: &Self::Output) -> bool
     where
         Self: Sized,
     {
@@ -415,7 +415,7 @@ pub trait LiteralTrait: BaseType + std::fmt::Display {
         self.suffix().matches_string(rhs)
     }
 
-    fn matches(&self, rhs: &UnspannedLiteral) -> bool
+    fn matches(&self, rhs: &Literal) -> bool
     where
         Self: Sized,
     {
@@ -434,19 +434,8 @@ pub trait LiteralTrait: BaseType + std::fmt::Display {
 }
 
 macro_rules! literal {
-
-    // (@impl Literal $kind:ident -> $value_ty:ty) => {
-    //     impl Literal for $kind {
-    //         type Output = $value_ty;
-
-    //         fn value(&self) -> $value_ty {
-    //             self.value()
-    //         }
-    //     }
-    // };
-
-    (UnspannedLiteral::$variant:ident($kind:ident($wrapping:ident)) { Suffix = $suffix_enum:ident :: $suffix_variant:ident; $($tokens:tt)* }) => {
-        literal!(@impl LiteralTrait { impl = { UnspannedLiteral::$variant($kind($wrapping)) { $($tokens)* } } suffix($suffix_enum) = |l| {
+    (Literal::$variant:ident($kind:ident($wrapping:ident)) { Suffix = $suffix_enum:ident :: $suffix_variant:ident; $($tokens:tt)* }) => {
+        literal!(@impl LiteralTrait { impl = { Literal::$variant($kind($wrapping)) { $($tokens)* } } suffix($suffix_enum) = |l| {
             match l.inner.type_suffix() {
                 Some(suffix) => Mown::Owned($suffix_enum::special_without_span(suffix)),
                 None => Mown::Owned($suffix_enum::general(GeneralSuffix::None))
@@ -454,10 +443,10 @@ macro_rules! literal {
         } });
     };
 
-    (UnspannedLiteral::$variant:ident($kind:ident($wrapping:ident)) { $($tokens:tt)* }) => {
+    (Literal::$variant:ident($kind:ident($wrapping:ident)) { $($tokens:tt)* }) => {
         literal!(@impl LiteralTrait {
             impl = {
-                UnspannedLiteral::$variant($kind($wrapping)) {
+                Literal::$variant($kind($wrapping)) {
                     $($tokens)*
                 }
             }
@@ -468,7 +457,7 @@ macro_rules! literal {
 
     (@impl LiteralTrait {
         impl = {
-            UnspannedLiteral::$variant:ident($kind:ident($wrapping:ident)) {
+            Literal::$variant:ident($kind:ident($wrapping:ident)) {
                 value($literal:tt) -> &$value_ty:ty { $($value_expr:tt)* }
             }
         }
@@ -488,12 +477,12 @@ macro_rules! literal {
                 Mown::Owned(self.inner.to_string())
             }
 
-            fn check(rhs: &UnspannedLiteral) -> Option<&Self>
+            fn check(rhs: &Literal) -> Option<&Self>
             where
                 Self: Sized,
             {
                 match rhs {
-                    UnspannedLiteral::$variant(rhs) => Some(rhs),
+                    Literal::$variant(rhs) => Some(rhs),
                     _ => None
                 }
             }
@@ -507,7 +496,7 @@ macro_rules! literal {
 
     (@impl LiteralTrait {
         impl = {
-            UnspannedLiteral::$variant:ident($kind:ident($wrapping:ident)) { value($literal:tt) -> $value_ty:ty { $($value_expr:tt)* } }
+            Literal::$variant:ident($kind:ident($wrapping:ident)) { value($literal:tt) -> $value_ty:ty { $($value_expr:tt)* } }
         }
         suffix($suffix_ty:ident) = |$suffix_ident:tt| { $($suffix_expr:tt)* }
     }) => {
@@ -525,12 +514,12 @@ macro_rules! literal {
                 Mown::Owned(self.inner.to_string())
             }
 
-            fn check(rhs: &UnspannedLiteral) -> Option<&Self>
+            fn check(rhs: &Literal) -> Option<&Self>
             where
                 Self: Sized
             {
                 match rhs {
-                    UnspannedLiteral::$variant(rhs) => Some(rhs),
+                    Literal::$variant(rhs) => Some(rhs),
                     _ => None
                 }
             }
@@ -595,32 +584,32 @@ macro_rules! literal {
     };
 }
 
-literal!(UnspannedLiteral::String(StringLiteral(StringLit)) {
+literal!(Literal::String(StringLiteral(StringLit)) {
     value(string_lit) -> &str { string_lit.value() }
 });
 
-literal!(UnspannedLiteral::ByteString(ByteStringLiteral(ByteStringLit)) {
+literal!(Literal::ByteString(ByteStringLiteral(ByteStringLit)) {
     value(byte_string_lit) -> &[u8] { byte_string_lit.value() }
 });
 
-literal!(UnspannedLiteral::Byte(ByteLiteral(ByteLit)) {
+literal!(Literal::Byte(ByteLiteral(ByteLit)) {
     value(byte_lit) -> u8 { byte_lit.value() }
 });
 
-literal!(UnspannedLiteral::Char(CharLiteral(CharLit)) {
+literal!(Literal::Char(CharLiteral(CharLit)) {
     value(char_lit) -> char {
         char_lit.value()
     }
 });
 
-literal!(UnspannedLiteral::Integer(IntegerLiteral(IntegerLit)) {
+literal!(Literal::Integer(IntegerLiteral(IntegerLit)) {
     Suffix = AnyIntegerSuffix::Integer;
     value(integer_lit) -> i128 {
         integer_lit.value::<i128>().expect("UNEXPECTED: litrs::IntegerLit's value method should always support i128")
     }
 });
 
-literal!(UnspannedLiteral::Float(FloatLiteral(FloatLit)) {
+literal!(Literal::Float(FloatLiteral(FloatLit)) {
     Suffix = AnyFloatSuffix::Float;
     value(float_lit) -> BigDecimal {
         let string = float_lit.number_part().replace("_", "-");

@@ -21,6 +21,9 @@ proc-macro2 = "1.0.29"
 quote = "1.0.9"
 oxidate-macros = { version = "0.1.0", path = "../oxidate-macros" }
 thiserror = "1.0.29"
+yoke = { version = "0.2.3", features = ["derive"] }
+regex = "1.5.4"
+amplify = "3.9.1"
 
 [dev-dependencies]
 pad = "0.1.6"
