@@ -106,4 +106,6 @@ impl MacroError {
     }
 }
 
+// impl From<
+
 pub type MacroResult<T> = Result<T, MacroError>;
